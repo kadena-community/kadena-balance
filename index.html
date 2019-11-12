@@ -1,0 +1,157 @@
+<html>
+<head>
+    <title>Kadena Balance Checker</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <script src="pact-lang-api-global.min.js"></script>
+    <script>
+
+    function attachCell(tag, value, parentId, cellId){
+      var node = document.createElement(tag);
+      var textnode = document.createTextNode(value);
+      if (!document.getElementById(cellId)){
+        node.setAttribute("id", cellId);
+        node.appendChild(textnode);
+        document.getElementById(parentId).appendChild(node);
+      } else{
+        document.getElementById(cellId).textContent = value;
+      }
+    }
+
+    var chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    var chainBal = {}
+    function getBalance (server, acctName, chainId) {
+      Pact.fetch.local({
+        pactCode: `(coin.get-balance ${acctName})`,
+        keyPairs: Pact.crypto.genKeyPair(),
+      }, `https://` + server + `/chainweb/0.0/mainnet01/chain/${chainId}/pact`)
+      .then(result => {
+        let bal = (typeof result.data ==="number") ? result.data: 0;
+        chainBal[chainId] = bal;
+        let totalBal = Object.values(chainBal).reduce((accum, cum) => accum+cum, 0)
+        attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
+        const balanceElem = document.getElementById(`chain-${chainId}-balance-data`);
+        if (result.status==="success"){
+          balanceElem.textContent = result.data;
+          balanceElem.className = "";
+        } else if (result.status==="failure" && result.error.message.slice(0,24)==="with-read: row not found"){
+          balanceElem.textContent = "Doesn't Exist"
+          balanceElem.className = "warning";
+        } else {
+          balanceElem.textContent = "Request Failed"
+          balanceElem.className = "error";
+        }
+      })
+      .catch((e) => {
+        document.getElementById(`chain-${chainId}-balance-data`).textContent = "Request Failed"
+        document.getElementById(`chain-${chainId}-balance-data`).className = "error";
+        attachCell("h4", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
+      })
+    }
+
+    window.addEventListener('load', function (event) {
+      if (localStorage.getItem("kadena-server")){
+        document.getElementById("server").value = localStorage.getItem("kadena-server");
+      }
+      if (localStorage.getItem("kadena-account")){
+        document.getElementById("account").value = localStorage.getItem("kadena-account");
+      }
+    }, false);
+
+    document.addEventListener('click', async function (event) {
+      chainBal = {}
+      if (!event.target.matches('#balance')) return;
+      event.preventDefault();
+      if (document.getElementById('account').value.length<4){
+        document.getElementById("account-field").className = "field error"
+        document.getElementById("kadena-form").className = "ui form error"
+      } else{
+        document.getElementById("account-field").className = "field"
+        document.getElementById("kadena-form").className = "ui form"
+        localStorage.setItem("kadena-server", document.getElementById('server').value);
+        localStorage.setItem("kadena-account", document.getElementById('account').value);
+        attachCell("tr", "", "chain-table", "chain-header");
+        attachCell("th", "Chain ID", "chain-header", "chainId-header");
+        attachCell("th", "Balance", "chain-header", "balance-header");
+        const server = document.getElementById('server').value;
+        const acctName = JSON.stringify(document.getElementById('account').value);
+        chainIds.forEach(id => {
+          attachCell("tr", "", "balance-data", `chain-${id}`)
+          attachCell("td", id, `chain-${id}`, `chain-${id}-data`)
+          attachCell("td", "fetching...", `chain-${id}`, `chain-${id}-balance-data`)
+          getBalance(server,acctName,id)
+        });
+      }
+    }, false);
+
+  </script>
+</head>
+<body>
+    <div id="main">
+      <div class="container">
+          <h1>Kadena Balance Checker</h1>
+          <form id ="kadena-form"class="ui form">
+            <div id="node-field" class="field">
+              <label>Target Chainweb Server</label>
+              <input type="text" id="server" placeholder="Enter Your Node Server">
+            </div>
+            <div id="account-field" class="field">
+              <label>Your Account Name</label>
+              <input type="text" id="account" placeholder="Enter Your Account Name">
+              <div id="acct-err" class="ui center error message">
+                <div class="header">Account name is at least 4 characters</div>
+              </div>
+            </div>
+          <button id="balance" class="ui primary button">Check Balance</button>
+          </form>
+          <div class="result">
+            <table class = "ui very basic center collapsing table" id="data-table">
+              <thead id="chain-table"/>
+              <tbody id="balance-data"/>
+            </table>
+            <div id="total"/>
+          </div>
+    </div>
+</body>
+<style>
+
+.container {
+  text-align: center;
+  margin-top: 20px;
+}
+.result {
+ margin-top: 20px;
+}
+.check-button {
+  margin-top: 15px;
+}
+.ui #server {
+  margin-top: 5px;
+  width: 300px;
+}
+.ui #account {
+  margin-top: 5px;
+  width: 300px;
+}
+.ui #acct-err {
+  margin-top: 5px;
+  width: 300px;
+  margin: auto;
+  font-size: 13px;
+}
+table#data-table {
+  margin-left:auto;
+  margin-right:auto;
+}
+
+table#data-table th{
+  text-align: center;
+  width: 100px;
+}
+table#data-table td{
+  text-align: center;
+  width: 130px;
+}
+</style>
+</html>
