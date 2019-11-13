@@ -1,4 +1,4 @@
-# kadena-balance
+# Kadena Balance Checker
 Webpage to check account balance on Kadena mainnet. 
 
 ## Open file on browser
