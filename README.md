@@ -1,4 +1,11 @@
 # kadena-balance
+Webpage to check account balance on Kadena mainnet. 
+
+## Open file on browser
+
+```
+open index.html
+```
 
 ## Docker
 
