@@ -23,9 +23,12 @@
     var chainBal = {}
     function getBalance (server, acctName, chainId) {
       Pact.fetch.local({
-        pactCode: `(coin.get-balance ${acctName})`,
-        keyPairs: Pact.crypto.genKeyPair(),
-      }, `https://` + server + `/chainweb/0.0/mainnet01/chain/${chainId}/pact`)
+      pactCode: `(coin.get-balance ${acctName})`,
+      keyPairs: Pact.crypto.genKeyPair(),
+      caps: [Pact.lang.mkCap("Gas capability", "description of gas cap", "coin.GAS", [])],
+      //account name, chain id, gas price, gas limit, creation time, time-to-live
+      meta: Pact.lang.mkMeta("not-real", chainId, 0.00000001, 10000, (Math.round((new Date).getTime()/1000)-15), 600)
+    }, `https://` + server + `/chainweb/0.0/mainnet01/chain/${chainId}/pact`)
       .then(result => {
         let bal = (typeof result.data ==="number") ? result.data: 0;
         chainBal[chainId] = bal;
