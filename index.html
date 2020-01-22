@@ -86,7 +86,7 @@
       const server = document.getElementById('server').value;
       const v = await getVersion(server);
       const host = (chainId) => `https://${server}/chainweb/0.0/${v}/chain/${chainId}/pact`;
-      if (document.getElementById('account').value.length<4){
+      if (document.getElementById('account').value.length<3 || document.getElementById('account').value.length>256){
         document.getElementById("account-field").className = "field error"
         document.getElementById("kadena-form").className = "ui form error"
       } else{
@@ -122,7 +122,7 @@
               <label>Your Account Name</label>
               <input type="text" id="account" placeholder="Enter Your Account Name">
               <div id="acct-err" class="ui center error message">
-                <div class="header">Account name is at least 4 characters</div>
+                <div class="header">Account name is at least 3 characters</div>
               </div>
             </div>
           <button id="balance" class="ui primary button">Check Balance</button>
