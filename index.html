@@ -56,24 +56,25 @@
         const guardElem = document.getElementById(`chain-${chainId}-guard-data`);
         attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
         if (result.status==="success"){
+          const {pred, keys} = result.data.guard
           balanceElem.textContent = bal;
           balanceElem.className = "";
-          guardElem.textContent = JSON.stringify(result.data.guard);
+          guardElem.textContent = pred + "\r\n" + keys.reduce((accum, key) => JSON.stringify(key)+"\r\n" + accum, "")
           guardElem.className = "";
         } else if (result.status==="failure" && result.error.message.slice(0,24)==="with-read: row not found"){
-          balanceElem.textContent = ""
+          balanceElem.textContent = "N/A"
           balanceElem.className = "warning";
           guardElem.textContent = "Doesn't Exist"
           guardElem.className = "warning";
         } else {
-          balanceElem.textContent = ""
+          balanceElem.textContent = "N/A"
           balanceElem.className = "error";
           guardElem.textContent = "Request Failed"
           guardElem.className = "error";
         }
       } catch(e){
         console.log(e)
-        document.getElementById(`chain-${chainId}-balance-data`).textContent = ""
+        document.getElementById(`chain-${chainId}-balance-data`).textContent = "N/A"
         document.getElementById(`chain-${chainId}-balance-data`).className = "error";
         document.getElementById(`chain-${chainId}-guard-data`).textContent = "Request Failed"
         document.getElementById(`chain-${chainId}-guard-data`).className = "error";
