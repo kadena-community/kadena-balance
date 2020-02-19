@@ -40,37 +40,48 @@
     async function getBalance (host, acctName, chainId) {
       try {
         const response = await Pact.fetch.local({
-            pactCode: `(coin.get-balance ${acctName})`,
+            pactCode: `(coin.details ${acctName})`,
             keyPairs: Pact.crypto.genKeyPair(),
             meta: dumMeta(chainId)
           }, host(chainId))
         const result = response.result;
         let bal = result.data
-          ? (typeof result.data ==="number")
-            ? result.data
-            : (result.data.decimal ? result.data.decimal : 0)
-          : 0;
+          ? (typeof result.data.balance ==="number")
+            ? result.data.balance
+            : (result.data.balance.decimal ? result.data.balance.decimal : 0)
+          : 0
         chainBal[chainId] = Number(bal);
         let totalBal = Object.values(chainBal).reduce((accum, cum) => accum+cum, 0);
-        attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
         const balanceElem = document.getElementById(`chain-${chainId}-balance-data`);
+        const guardElem = document.getElementById(`chain-${chainId}-guard-data`);
+        attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
         if (result.status==="success"){
           balanceElem.textContent = bal;
           balanceElem.className = "";
+          guardElem.textContent = JSON.stringify(result.data.guard);
+          guardElem.className = "";
         } else if (result.status==="failure" && result.error.message.slice(0,24)==="with-read: row not found"){
-          balanceElem.textContent = "Doesn't Exist"
+          balanceElem.textContent = ""
           balanceElem.className = "warning";
+          guardElem.textContent = "Doesn't Exist"
+          guardElem.className = "warning";
         } else {
-          balanceElem.textContent = "Request Failed"
+          balanceElem.textContent = ""
           balanceElem.className = "error";
+          guardElem.textContent = "Request Failed"
+          guardElem.className = "error";
         }
       } catch(e){
-        document.getElementById(`chain-${chainId}-balance-data`).textContent = "Request Failed"
+        console.log(e)
+        document.getElementById(`chain-${chainId}-balance-data`).textContent = ""
         document.getElementById(`chain-${chainId}-balance-data`).className = "error";
+        document.getElementById(`chain-${chainId}-guard-data`).textContent = "Request Failed"
+        document.getElementById(`chain-${chainId}-guard-data`).className = "error";
       }
     }
 
     window.addEventListener('load', function (event) {
+      document.getElementById("server").value = "us-e1.chainweb.com"
       if (localStorage.getItem("kadena-server")){
         document.getElementById("server").value = localStorage.getItem("kadena-server");
       }
@@ -96,11 +107,13 @@
         localStorage.setItem("kadena-account", document.getElementById('account').value);
         attachCell("tr", "", "chain-table", "chain-header");
         attachCell("th", "Chain ID", "chain-header", "chainId-header");
+        attachCell("th", "Guard", "chain-header", "guard-header");
         attachCell("th", "Balance", "chain-header", "balance-header");
         const acctName = JSON.stringify(document.getElementById('account').value);
         chainIds.forEach(id => {
           attachCell("tr", "", "balance-data", `chain-${id}`)
           attachCell("td", id, `chain-${id}`, `chain-${id}-data`)
+          attachCell("td", "fetching...", `chain-${id}`, `chain-${id}-guard-data`)
           attachCell("td", "fetching...", `chain-${id}`, `chain-${id}-balance-data`)
           getBalance(host,acctName,id)
         });
