@@ -56,11 +56,16 @@
         const guardElem = document.getElementById(`chain-${chainId}-guard-data`);
         attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
         if (result.status==="success"){
-          const {pred, keys} = result.data.guard
           balanceElem.textContent = bal;
           balanceElem.className = "";
-          guardElem.textContent = pred + "\r\n" + keys.reduce((accum, key) => JSON.stringify(key)+"\r\n" + accum, "")
-          guardElem.className = "";
+          try {
+           const {pred, keys} = result.data.guard
+           guardElem.textContent = pred + "\r\n" + keys.reduce((accum, key) => JSON.stringify(key)+"\r\n" + accum, "")
+           guardElem.className = "";
+         } catch {
+           guardElem.textContent = JSON.stringify(result.data.guard)
+           guardElem.className = "";
+         }
         } else if (result.status==="failure" && result.error.message.slice(0,24)==="with-read: row not found"){
           balanceElem.textContent = "N/A"
           balanceElem.className = "warning";
