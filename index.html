@@ -43,7 +43,6 @@
       try {
         const response = await Pact.fetch.local({
             pactCode: `(coin.details ${acctName})`,
-            keyPairs: Pact.crypto.genKeyPair(),
             meta: dumMeta(chainId)
           }, host(chainId))
         const result = response.result;
@@ -65,8 +64,24 @@
            guardElem.textContent = pred + "\r\n" + keys.reduce((accum, key) => JSON.stringify(key)+"\r\n" + accum, "")
            guardElem.className = "";
          } catch {
-           guardElem.textContent = JSON.stringify(result.data.guard)
-           guardElem.className = "";
+           //Fetch keyset-ref-guard
+           if (result.data.guard.keysetref){
+             try {
+               const response = await Pact.fetch.local({
+                   pactCode: `(describe-keyset "${result.data.guard.keysetref}")`,
+                   meta: dumMeta(chainId)
+                 }, host(chainId))
+                 const {pred, keys} = response.result.data
+                 guardElem.textContent = pred + "\r\n" + keys.reduce((accum, key) => JSON.stringify(key)+"\r\n" + accum, "")
+                 guardElem.className = "";
+             } catch {
+               guardElem.textContent = JSON.stringify(result.data.guard)
+               guardElem.className = "";
+             }
+           } else {
+             guardElem.textContent = JSON.stringify(result.data.guard)
+             guardElem.className = "";
+           }
          }
         } else if (result.status==="failure" && result.error.message.slice(0,24)==="with-read: row not found"){
           balanceElem.textContent = "N/A"
