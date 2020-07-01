@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pact-lang-api@4.1.2/pact-lang-api-global.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <script>
 
     function attachCell(tag, value, parentId, cellId){
@@ -25,6 +25,7 @@
     var chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     var chainBal = {}
 
+
     const creationTime = () => Math.round((new Date).getTime()/1000)-15;
     //mkMeta takes in account name, chain id, gas price, gas limit, creation time, time-to-live
     const dumMeta = (chainId) =>  Pact.lang.mkMeta("not-real", chainId, 0.00000001, 6000, creationTime(), 600)
@@ -33,7 +34,23 @@
       try {
         const res = await fetch(`https://${server}/info`);
         const resJSON = await res.json();
-        return resJSON.nodeVersion;
+        const av = resJSON.nodeApiVersion;
+        const nv = resJSON.nodeVersion;
+        const bh = resJSON.nodeGraphHistory[0][0]
+        const len = resJSON.nodeGraphHistory[0][1].length
+        if (resJSON.nodeChains.length !== 10) {
+          const cut = await fetch(`https://${server}/chainweb/${av}/${nv}/cut`)
+          const cutJSON = await cut.json();
+          const h = cutJSON.height
+          if (h > bh) {
+            let cids = Array.from(Array(len).keys());
+            cids = cids.map(x => x.toString())
+            chainIds = cids;
+          }
+        }
+        return {
+          nv: nv
+        }
       }
       catch(e){
         attachCell("h4", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
@@ -119,8 +136,8 @@
       if (!event.target.matches('#balance')) return;
       event.preventDefault();
       const server = document.getElementById('server').value;
-      const v = await getVersion(server);
-      const host = (chainId) => `https://${server}/chainweb/0.0/${v}/chain/${chainId}/pact`;
+      const info = await getVersion(server);
+      const host = (chainId) => `https://${server}/chainweb/0.0/${info.nv}/chain/${chainId}/pact`;
       if (document.getElementById('account').value.length<3 || document.getElementById('account').value.length>256){
         document.getElementById("account-field").className = "field error"
         document.getElementById("kadena-form").className = "ui form error"
