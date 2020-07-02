@@ -36,9 +36,9 @@
         const resJSON = await res.json();
         const av = resJSON.nodeApiVersion;
         const nv = resJSON.nodeVersion;
-        const bh = resJSON.nodeGraphHistory[0][0]
-        const len = resJSON.nodeGraphHistory[0][1].length
         if (resJSON.nodeChains.length !== 10) {
+          const bh = resJSON.nodeGraphHistory[0][0]
+          const len = resJSON.nodeGraphHistory[0][1].length
           const cut = await fetch(`https://${server}/chainweb/${av}/${nv}/cut`)
           const cutJSON = await cut.json();
           const h = cutJSON.height
@@ -46,13 +46,18 @@
             let cids = Array.from(Array(len).keys());
             cids = cids.map(x => x.toString())
             chainIds = cids;
+          } else {
+            chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
           }
+        } else {
+          chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
         }
         return {
           nv: nv
         }
       }
       catch(e){
+        console.log(e)
         attachCell("h4", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
       }
     }
