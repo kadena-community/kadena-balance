@@ -62,10 +62,10 @@
       }
     }
 
-    async function getBalance (host, acctName, chainId) {
+    async function getBalance (host, token, acctName, chainId) {
       try {
         const response = await Pact.fetch.local({
-            pactCode: `(coin.details ${acctName})`,
+            pactCode: `(${token}.details ${acctName})`,
             meta: dumMeta(chainId)
           }, host(chainId))
         const result = response.result;
@@ -129,7 +129,10 @@
     window.addEventListener('load', function (event) {
       document.getElementById("server").value = "us-e1.chainweb.com"
       if (localStorage.getItem("kadena-server")){
-        document.getElementById("server").value = localStorage.getItem("kadena-server");
+          document.getElementById("server").value = localStorage.getItem("kadena-server");
+      }
+      if (localStorage.getItem("kadena-token")){
+        document.getElementById("token").value = localStorage.getItem("kadena-token");
       }
       if (localStorage.getItem("kadena-account")){
         document.getElementById("account").value = localStorage.getItem("kadena-account");
@@ -141,6 +144,7 @@
       if (!event.target.matches('#balance')) return;
       event.preventDefault();
       const server = document.getElementById('server').value;
+      const token = document.getElementById('token').value;
       const info = await getVersion(server);
       const host = (chainId) => `https://${server}/chainweb/0.0/${info.nv}/chain/${chainId}/pact`;
       if (document.getElementById('account').value.length<3 || document.getElementById('account').value.length>256){
@@ -161,7 +165,7 @@
           attachCell("td", id, `chain-${id}`, `chain-${id}-data`)
           attachCell("td", "fetching...", `chain-${id}`, `chain-${id}-guard-data`)
           attachCell("td", "fetching...", `chain-${id}`, `chain-${id}-balance-data`)
-          getBalance(host,acctName,id)
+          getBalance(host,token,acctName,id)
         });
       }
     }, false);
@@ -172,10 +176,14 @@
     <div id="main">
       <div class="container">
           <h1>Kadena Balance Checker</h1>
-          <form id ="kadena-form"class="ui form">
+          <form id ="kadena-form" class="ui form">
             <div id="node-field" class="field">
-              <label>Target Chainweb Server</label>
-              <input type="text" id="server" placeholder="Enter Your Node Server">
+                <label>Target Chainweb Server</label>
+                <input type="text" id="server" placeholder="Enter Your Node Server">
+            </div>
+            <div id="token-field" class="field">
+              <label>Token Name</label>
+              <input type="text" id="token" placeholder="Enter the name of the token contract" value="coin" >
             </div>
             <div id="account-field" class="field">
               <label>Your Account Name</label>
@@ -207,13 +215,9 @@
 .check-button {
   margin-top: 15px;
 }
-.ui #server {
+.field input {
   margin-top: 5px;
-  width: 300px;
-}
-.ui #account {
-  margin-top: 5px;
-  width: 300px;
+  width: 300px!important;
 }
 .ui #acct-err {
   margin-top: 5px;
