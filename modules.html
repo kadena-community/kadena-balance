@@ -6,6 +6,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pact-lang-api@4.1.2/pact-lang-api-global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js" integrity="sha512-GoORoNnxst42zE3rYPj4bNBm0Q6ZRXKNH2D9nEmNvVF/z24ywVnijAWVi/09iBiVDQVf3UlZHpzhAJIdd9BXqw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-clojure.min.js" integrity="sha512-98A+a0mNRbC5aD1wC0SutvdbIkdEdhZTl7VZCDwJO3moIvChukHxGTkI7sZ0J+njnD6FgoCc/7ATLTJywVYA3g==" crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script>
@@ -81,7 +83,9 @@
     }
 
     async function go () {
+
       document.getElementById("minfo").style.display="none";
+      document.getElementById("result").style.display="block";
     const server = document.getElementById('server').value;
         const module = document.getElementById('module').value;
         const chain = document.getElementById('chain').value;
@@ -106,7 +110,12 @@
         const result = response.result;
         const resultElem = document.getElementById("result");
         if (result.status==="success"){
-          resultElem.textContent = result.data.code;
+          resultElem.style.height = "600px";
+          resultElem.style.width = "800px";
+          editor.setValue(result.data.code);
+          editor.resize();
+          editor.getSession().selection.clearSelection();
+
           document.getElementById("minfo").style.display="table";
           document.getElementById("minfo").style.width="600px";
           resultElem.style.boxShadow="10px 10px 8px #888888";
@@ -206,7 +215,7 @@
                 <tr><td class="ml">Blessed</td><td class="md" id="mblessed"></td></tr>
                 <tr><td class="ml">Share</td><td class="md"><a href="#" id="mlink"></a></td></tr>
               </table></td></tr>
-              <tr><td><pre id="result"></pre></td></tr>
+              <tr><td><div id="result"></div></td></tr>
             </table>
 
           </div>
@@ -266,6 +275,8 @@ table#data-table td{
   margin-right:auto;
   text-align:left;
   padding: 10px;
+  height: 100%;
+  display: none;
 }
 #minfo {
   width = 600px;
@@ -289,5 +300,12 @@ span.headlink {
   width: auto;
 }
 
+
+
 </style>
+<script>
+    var editor = ace.edit("result");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/clojure");
+</script>
 </html>
