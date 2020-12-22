@@ -81,6 +81,7 @@
     }
 
     async function go () {
+      document.getElementById("minfo").style.display="none";
     const server = document.getElementById('server').value;
         const module = document.getElementById('module').value;
         const chain = document.getElementById('chain').value;
@@ -89,14 +90,14 @@
 
         document.getElementById("module-field").className = "field"
         document.getElementById("kadena-form").className = "ui form"
-        localStorage.setItem("kadena-server", document.getElementById('server').value);
+        localStorage.setItem("kadena-module-server", document.getElementById('server').value);
         localStorage.setItem("kadena-module", document.getElementById('module').value);
         localStorage.setItem("kadena-chain", document.getElementById('chain').value);
-        getCode(host,module,chain);
+        getCode(server,host,module,chain);
 
     }
 
-    async function getCode (host, module, chainId) {
+    async function getCode (server, host, module, chainId) {
       try {
         const response = await Pact.fetch.local({
             pactCode: `(describe-module "${module}")`,
@@ -106,6 +107,16 @@
         const resultElem = document.getElementById("result");
         if (result.status==="success"){
           resultElem.textContent = result.data.code;
+          document.getElementById("minfo").style.display="table";
+          document.getElementById("minfo").style.width="600px";
+          resultElem.style.boxShadow="10px 10px 8px #888888";
+          resultElem.style.border="thin solid lightgrey";
+
+          document.getElementById("mhash").textContent=result.data.hash;
+          document.getElementById("mname").textContent=result.data.name;
+          document.getElementById("mblessed").textContent=JSON.stringify(result.data.blessed);
+          document.getElementById("mlink").textContent="Link"
+          document.getElementById("mlink").href=`?server=${server}&module=${module}&chain=${chainId}`
         } else if (result.status==="failure"){
           resultElem.textContent = result.error.message;
           resultElem.className = "warning";
@@ -187,7 +198,16 @@
             </div>
           <button id="getcode" class="ui primary button">Get Code</button>
           </form>
-          <div class="result"><table id="data-table"><tr><td><pre id="result"></pre></td></tr></table>
+          <div class="result">
+            <table id="data-table">
+              <tr><td><table id="minfo">
+                <tr><td class="ml">Name</td><td class="md" id="mname"></td></tr>
+                <tr><td class="ml">Hash</td><td class="md" id="mhash"></td></tr>
+                <tr><td class="ml">Blessed</td><td class="md" id="mblessed"></td></tr>
+                <tr><td class="ml">Share</td><td class="md"><a href="#" id="mlink"></a></td></tr>
+              </table></td></tr>
+              <tr><td><pre id="result"></pre></td></tr>
+            </table>
 
           </div>
     </div>
@@ -233,21 +253,23 @@ table#data-table th{
   width: 100px;
 }
 table#data-table td{
-  text-align: center;
-  width: 130px;
+  text-align: left;
 }
 .result {
-  width = 300px;
   margin-left:auto;
   margin-right:auto;
   text-align:center;
-
 }
 #result {
-  width = 300px;
+  width = 600px;
   margin-left:auto;
   margin-right:auto;
   text-align:left;
+  padding: 10px;
+}
+#minfo {
+  width = 600px;
+  display: none;
 }
 #subhead {
 margin-top: -10px;
@@ -259,5 +281,13 @@ margin-bottom: 10px;
 span.headlink {
   color: lightgrey;
 }
+.ml {
+  width: 100px;
+  color: grey;
+}
+.md {
+  width: auto;
+}
+
 </style>
 </html>
