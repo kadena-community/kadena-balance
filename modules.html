@@ -12,148 +12,156 @@
 
     <script>
 
-    function attachCell(tag, value, parentId, cellId){
-      var node = document.createElement(tag);
-      var textnode = document.createTextNode(value);
-      if (!document.getElementById(cellId)){
-        node.setAttribute("id", cellId);
-        node.appendChild(textnode);
-        document.getElementById(parentId).appendChild(node);
-      } else{
-        document.getElementById(cellId).textContent = value;
+      function attachCell(tag, value, parentId, cellId){
+        var node = document.createElement(tag);
+        var textnode = document.createTextNode(value);
+        if (!document.getElementById(cellId)){
+          node.setAttribute("id", cellId);
+          node.appendChild(textnode);
+          document.getElementById(parentId).appendChild(node);
+        } else{
+          document.getElementById(cellId).textContent = value;
+        }
       }
-    }
 
-    function urlParam (name) {
-      var results = new RegExp('[\?&]' + name + '=([^&#]*)')
-                      .exec(window.location.search);
+      function urlParam (name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+          .exec(window.location.search);
 
-      return (results !== null) ? results[1] || 0 : false;
-    }
+        return (results !== null) ? results[1] || 0 : false;
+      }
 
-    var chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    var chainBal = {}
+      var chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      var chainBal = {}
 
 
-    const creationTime = () => Math.round((new Date).getTime()/1000)-15;
-    //mkMeta takes in account name, chain id, gas price, gas limit, creation time, time-to-live
-    const dumMeta = (chainId) =>  Pact.lang.mkMeta("not-real", chainId, 0.00000001, 6000, creationTime(), 600)
+      const creationTime = () => Math.round((new Date).getTime()/1000)-15;
+      //mkMeta takes in account name, chain id, gas price, gas limit, creation time, time-to-live
+      const dumMeta = (chainId) =>  Pact.lang.mkMeta("not-real", chainId, 0.00000001, 6000, creationTime(), 600)
 
-    async function getVersion(server){
-      try {
-        const res = await fetch(`https://${server}/info`);
-        const resJSON = await res.json();
-        const av = resJSON.nodeApiVersion;
-        const nv = resJSON.nodeVersion;
-        if (resJSON.nodeChains.length !== 10) {
-          const bh = resJSON.nodeGraphHistory[0][0]
-          const len = resJSON.nodeGraphHistory[0][1].length
-          const cut = await fetch(`https://${server}/chainweb/${av}/${nv}/cut`)
-          const cutJSON = await cut.json();
-          const h = cutJSON.height
-          if (h > bh) {
-            let cids = Array.from(Array(len).keys());
-            cids = cids.map(x => x.toString())
-            chainIds = cids;
+      async function getVersion(server){
+        try {
+          const res = await fetch(`https://${server}/info`);
+          const resJSON = await res.json();
+          const av = resJSON.nodeApiVersion;
+          const nv = resJSON.nodeVersion;
+          if (resJSON.nodeChains.length !== 10) {
+            const bh = resJSON.nodeGraphHistory[0][0]
+            const len = resJSON.nodeGraphHistory[0][1].length
+            const cut = await fetch(`https://${server}/chainweb/${av}/${nv}/cut`)
+            const cutJSON = await cut.json();
+            const h = cutJSON.height
+            if (h > bh) {
+              let cids = Array.from(Array(len).keys());
+              cids = cids.map(x => x.toString())
+              chainIds = cids;
+            } else {
+              chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+            }
           } else {
             chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
           }
-        } else {
-          chainIds = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+          return {
+            nv: nv
+          }
         }
-        return {
-          nv: nv
+        catch(e){
+          console.log(e)
+          attachCell("h4", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
         }
       }
-      catch(e){
-        console.log(e)
-        attachCell("h4", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
+
+      function restore(id, storage, qry) {
+        if (urlParam(qry)) {
+          document.getElementById(id).value=urlParam(qry);
+          return urlParam(qry);
+        } else if (localStorage.getItem(storage)) {
+          document.getElementById(id).value=localStorage.getItem(storage);
+        }
+        return false;
+
       }
-    }
 
-    function restore(id, storage, qry) {
-      if (urlParam(qry)) {
-        document.getElementById(id).value=urlParam(qry);
-        return urlParam(qry);
-      } else if (localStorage.getItem(storage)) {
-        document.getElementById(id).value=localStorage.getItem(storage);
-      }
-      return false;
+      async function go () {
 
-    }
-
-    async function go () {
-
-      document.getElementById("minfo").style.display="none";
-      document.getElementById("result").style.display="block";
-    const server = document.getElementById('server').value;
+        document.getElementById("minfo").style.display="none";
+        document.getElementById("result").style.display="block";
+        const server = document.getElementById('server').value;
         const module = document.getElementById('module').value;
         const chain = document.getElementById('chain').value;
-      const info = await getVersion(server);
-      const host = `https://${server}/chainweb/0.0/${info.nv}/chain/${chain}/pact`;
+        const info = await getVersion(server);
+        const host = `https://${server}/chainweb/0.0/${info.nv}/chain/${chain}/pact`;
 
         document.getElementById("module-field").className = "field"
         document.getElementById("kadena-form").className = "ui form"
         localStorage.setItem("kadena-module-server", document.getElementById('server').value);
         localStorage.setItem("kadena-module", document.getElementById('module').value);
         localStorage.setItem("kadena-chain", document.getElementById('chain').value);
-        getCode(server,host,module,chain);
+        await getCode(server,host,module,chain);
+        console.log("done");
+        if (urlParam("line")) {
+          var l = parseInt(urlParam("line"));
+          l = l > 0 ? l - 1 : 0;
+          await editor.scrollToLine(l,false,true,null);
+          editor.getSession().selection.moveCursorTo(l,0,false);
+        }
 
-    }
+      }
 
-    async function getCode (server, host, module, chainId) {
-      try {
-        const response = await Pact.fetch.local({
+      async function getCode (server, host, module, chainId) {
+        try {
+          const response = await Pact.fetch.local({
             pactCode: `(describe-module "${module}")`,
             meta: dumMeta(chainId)
           }, host)
-        const result = response.result;
-        const resultElem = document.getElementById("result");
-        if (result.status==="success"){
-          resultElem.style.height = "600px";
-          resultElem.style.width = "800px";
-          editor.setValue(result.data.code);
-          editor.resize();
-          editor.getSession().selection.clearSelection();
+          const result = response.result;
+          const resultElem = document.getElementById("result");
+          if (result.status==="success"){
+            resultElem.style.height = "600px";
+            resultElem.style.width = "800px";
+            editor.setValue(result.data.code);
+            editor.setReadOnly(true);
+            editor.resize();
+            editor.getSession().selection.clearSelection();
 
-          document.getElementById("minfo").style.display="table";
-          document.getElementById("minfo").style.width="600px";
-          resultElem.style.boxShadow="10px 10px 8px #888888";
-          resultElem.style.border="thin solid lightgrey";
+            document.getElementById("minfo").style.display="table";
+            document.getElementById("minfo").style.width="600px";
+            resultElem.style.boxShadow="10px 10px 8px #888888";
+            resultElem.style.border="thin solid lightgrey";
 
-          document.getElementById("mhash").textContent=result.data.hash;
-          document.getElementById("mname").textContent=result.data.name;
-          document.getElementById("mblessed").textContent=JSON.stringify(result.data.blessed);
-          document.getElementById("mlink").textContent="Link"
-          document.getElementById("mlink").href=`?server=${server}&module=${module}&chain=${chainId}`
-        } else if (result.status==="failure"){
-          resultElem.textContent = result.error.message;
-          resultElem.className = "warning";
-        } else {
+            document.getElementById("mhash").textContent=result.data.hash;
+            document.getElementById("mname").textContent=result.data.name;
+            document.getElementById("mblessed").textContent=JSON.stringify(result.data.blessed);
+            document.getElementById("mlink").textContent="Link"
+            document.getElementById("mlink").href=`?server=${server}&module=${module}&chain=${chainId}`
+          } else if (result.status==="failure"){
+            resultElem.textContent = result.error.message;
+            resultElem.className = "warning";
+          } else {
+            resultElem.textContent = "Request failed";
+            resultElem.className = "warning";
+          }
+        } catch(e){
+          console.log(e)
           resultElem.textContent = "Request failed";
           resultElem.className = "warning";
         }
-      } catch(e){
-        console.log(e)
-        resultElem.textContent = "Request failed";
-        resultElem.className = "warning";
       }
-    }
 
-    window.addEventListener('load', function (event) {
-      const s = restore("server","kadena-module-server","server");
-      const m = restore("module","kadena-module","module");
-      const c = restore("chain","kadena-chain","chain");
-      if (s && m && c) {
+      window.addEventListener('load', function (event) {
+        const s = restore("server","kadena-module-server","server");
+        const m = restore("module","kadena-module","module");
+        const c = restore("chain","kadena-chain","chain");
+        if (s && m && c) {
+          go();
+        }
+      }, false);
+
+      document.addEventListener('click', async function (event) {
+        chainBal = {}
+        if (!event.target.matches('#getcode')) return;
+        event.preventDefault();
         go();
-      }
-    }, false);
-
-    document.addEventListener('click', async function (event) {
-      chainBal = {}
-      if (!event.target.matches('#getcode')) return;
-      event.preventDefault();
-      go();
 
 
     }, false);
@@ -305,7 +313,6 @@ span.headlink {
 </style>
 <script>
     var editor = ace.edit("result");
-    editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/clojure");
 </script>
 </html>
