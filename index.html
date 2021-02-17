@@ -127,9 +127,11 @@
     }
 
     window.addEventListener('load', function (event) {
-      document.getElementById("server").value = "us-e1.chainweb.com"
-      if (localStorage.getItem("kadena-server")){
-          document.getElementById("server").value = localStorage.getItem("kadena-server");
+      if (localStorage.getItem("version")==="1" && localStorage.getItem("kadena-server")){
+         document.getElementById("server").value = localStorage.getItem("kadena-server");
+      } else {
+         document.getElementById("server").value = "api.chainweb.com"
+         localStorage.setItem("version","1")
       }
       if (localStorage.getItem("kadena-token")){
         document.getElementById("token").value = localStorage.getItem("kadena-token");
