@@ -127,7 +127,6 @@
     }
 
     window.addEventListener('load', function (event) {
-      console.log(localStorage.getItem("version")==="1", localStorage.getItem("kadena-server"))
       if (localStorage.getItem("version")==="1" && localStorage.getItem("kadena-server")){
          document.getElementById("server").value = localStorage.getItem("kadena-server");
       } else {
