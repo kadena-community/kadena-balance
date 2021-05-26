@@ -139,12 +139,26 @@
       if (localStorage.getItem("kadena-account")){
         document.getElementById("account").value = localStorage.getItem("kadena-account");
       }
-    }, false);
 
+      let search = window.location.href;
+      let params = new URLSearchParams(search);
+      if (params.get("account")) document.getElementById("account").value = params.get("account");
+      if (params.get("token")) document.getElementById("token").value = params.get("token");
+      if (params.get("version")) {
+        if (params.get("version") === "mainnet01") document.getElementById("server").value = "api.chainweb.com";
+        else if (params.get("version") === "testnet04")  document.getElementById("server").value = "api.testnet.chainweb.com";
+      }
+      if (params.get("account") && params.get("version")) onClick();
+    }, false);
+    
     document.addEventListener('click', async function (event) {
       chainBal = {}
       if (!event.target.matches('#balance')) return;
       event.preventDefault();
+      onClick();
+    }, false);
+
+    async function onClick() {
       const server = document.getElementById('server').value;
       const token = document.getElementById('token').value;
       const info = await getVersion(server);
@@ -170,6 +184,13 @@
           getBalance(host,token,acctName,id)
         });
       }
+    }
+
+    document.addEventListener('click', async function (event) {
+      chainBal = {}
+      if (!event.target.matches('#balance')) return;
+      event.preventDefault();
+      onClick();
     }, false);
 
   </script>
