@@ -133,6 +133,8 @@
          document.getElementById("server").value = "api.chainweb.com"
          localStorage.setItem("version","1")
       }
+      console.log(document.getElementById('server').value)
+
       if (localStorage.getItem("kadena-token")){
         document.getElementById("token").value = localStorage.getItem("kadena-token");
       }
@@ -142,15 +144,15 @@
 
       let search = window.location.href;
       let params = new URLSearchParams(search);
-      if (params.get("account")) document.getElementById("account").value = params.get("account");
       if (params.get("token")) document.getElementById("token").value = params.get("token");
-      if (params.get("version")) {
-        if (params.get("version") === "mainnet01") document.getElementById("server").value = "api.chainweb.com";
-        else if (params.get("version") === "testnet04")  document.getElementById("server").value = "api.testnet.chainweb.com";
+      if (params.get("server")) document.getElementById("server").value = params.get("server");
+      if (params.get("account")) {
+        document.getElementById("account").value = params.get("account");
+        onClick();
       }
-      if (params.get("account") && params.get("version")) onClick();
+
     }, false);
-    
+
     document.addEventListener('click', async function (event) {
       chainBal = {}
       if (!event.target.matches('#balance')) return;
