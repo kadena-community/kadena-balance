@@ -2,7 +2,7 @@
 <head>
     <title>Kadena Code Viewer</title>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pact-lang-api@4.1.2/pact-lang-api-global.min.js"></script>
@@ -125,7 +125,7 @@
             editor.getSession().selection.clearSelection();
 
             document.getElementById("minfo").style.display="table";
-            document.getElementById("minfo").style.width="600px";
+            document.getElementById("minfo").style.width="100%";
             resultElem.style.boxShadow="10px 10px 8px #888888";
             resultElem.style.border="thin solid lightgrey";
 
@@ -170,12 +170,24 @@
 </head>
 <body>
     <div id="main">
-      <div class="container">
-          <h1>Kadena Code Viewer</h1>
+
+      <img class="graph" src="./img/graph.png" alt="graph">
+      <div class="nav">
+        <h1>Kadena Code Viewer</h1>
+        <div class="container">
           <div id="subhead">
             <a class="headlink" href="index.html">Balance Checker</a>
-            <span class="headlink">Code Viewer</span>
+            <span class="headlink current">Code Viewer</span>
           </div>
+        </div>
+        <div class="container-right">
+          <!-- <div id="subhead">
+            <span class="headlink">Menu</span>
+          </div> -->
+        </div>
+      </div>
+
+      <div class="container">
           <form id ="kadena-form"class="ui form">
             <div id="node-field" class="field">
               <label>Server</label>
@@ -209,12 +221,18 @@
             <div id="module-field" class="field">
               <label>Module Name</label>
               <input type="text" id="module" placeholder="Enter Your Account Name">
-              <div id="acct-err" class="ui center error message">
-                <div class="header">Module name</div>
-              </div>
             </div>
-          <button id="getcode" class="ui primary button">Get Code</button>
+            <div id="acct-err account-field" class="ui center error message">
+              <div class="header info-text">Module name</div>
+            </div>
           </form>
+          
+          <div class="container">
+            <button id="getcode" class="ui primary button">Get Code</button>
+          </div>
+        </div>
+
+        <div class="result-container">
           <div class="result">
             <table id="data-table">
               <tr><td><table id="minfo">
@@ -225,92 +243,40 @@
               </table></td></tr>
               <tr><td><div id="result"></div></td></tr>
             </table>
+        </div>
 
-          </div>
-    </div>
+      </div>
 </body>
+
 <style>
+  body {
+    min-height: auto;
+  }
 
-.container {
-  text-align: center;
-  margin-top: 20px;
-}
-.result {
- margin-top: 20px;
-}
-.check-button {
-  margin-top: 15px;
-}
-.ui #server {
-  margin-top: 5px;
-  width: 300px;
-}
-.ui #chain {
-  margin-top: 5px;
-width: 300px;
-margin: auto;
-}
-.ui #module {
-  margin-top: 5px;
-  width: 300px;
-}
-.ui #acct-err {
-  margin-top: 5px;
-  width: 300px;
-  margin: auto;
-  font-size: 13px;
-}
-table#data-table {
-  margin-left:auto;
-  margin-right:auto;
-}
+  #result {
+    display: block;
+    border-radius: 1rem;
+    height: 615px !important;
+    width: 60vw !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
 
-table#data-table th{
-  text-align: center;
-  width: 100px;
-}
-table#data-table td{
-  text-align: left;
-}
-.result {
-  margin-left:auto;
-  margin-right:auto;
-  text-align:center;
-}
-#result {
-  width = 600px;
-  margin-left:auto;
-  margin-right:auto;
-  text-align:left;
-  padding: 10px;
-  height: 100%;
-  display: none;
-}
-#minfo {
-  width = 600px;
-  display: none;
-}
-#subhead {
-margin-top: -10px;
-margin-bottom: 10px;
-}
-.headlink {
-  padding: 1em;
-}
-span.headlink {
-  color: lightgrey;
-}
-.ml {
-  width: 100px;
-  color: grey;
-}
-.md {
-  width: auto;
-}
+  #data-table {
+    padding: 0.5rem;
+  }
 
+  table#data-table td{
+    border-radius: 1rem;
+  }
 
+  @media screen and (max-width: 842px) {
+  #result {
+    width: 100% !important;
+  }
+}
+</style> 
 
-</style>
 <script>
     var editor = ace.edit("result");
     editor.session.setMode("ace/mode/clojure");
