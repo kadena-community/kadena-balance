@@ -191,7 +191,8 @@
           <form id ="kadena-form"class="ui form">
             <div id="node-field" class="field">
               <label>Server</label>
-              <input type="text" id="server" placeholder="Enter Node Server">
+              <input type="text" id="server" placeholder="Enter Node Server"
+              onkeydown = "if (event.keyCode == 13) document.getElementById('getcode').click()">
             </div>
             <div id="chain-field" class="field">
               <label>Chain ID</label>
@@ -220,7 +221,8 @@
             </div>
             <div id="module-field" class="field">
               <label>Module Name</label>
-              <input type="text" id="module" placeholder="Enter Contract Account Name">
+              <input type="text" id="module" placeholder="Enter Contract Account Name"
+              onkeydown = "if (event.keyCode == 13) document.getElementById('getcode').click()">
             </div>
             <div id="acct-err account-field" class="ui center error message">
               <div class="header info-text">Module name</div>
