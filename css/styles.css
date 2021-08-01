@@ -87,14 +87,14 @@ body {
 }
 
 
-@media screen and (max-width: 1212px) {
+@media screen and (max-width: 1325px) {
   .headlinkContainer{
-    top: 6rem;
+    top: 6.5rem;
   }
 }
-@media screen and (max-width: 691px) {
+@media screen and (max-width: 864px) {
   .headlinkContainer{
-    top: 7rem;
+    top: 8rem;
   }
 }
 
