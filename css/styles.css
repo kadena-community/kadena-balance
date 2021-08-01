@@ -32,16 +32,23 @@ body {
   margin-bottom: 3rem;
 }
 
-#subhead{
+#subhead {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid #333333;
+  border: 1px solid #3333337d;
   background-color: #0e0e0e91;
   padding: 0.25rem;
   border-radius: 1rem;
   backdrop-filter: blur(5px);
+}
+.subheadButton:hover{
+  background-color: #29292991 !important;
+  cursor: pointer;
+}
+.subheadButton:active{
+  background-color: #a7a7a752 !important;
 }
 
 .current {
@@ -50,10 +57,63 @@ body {
   cursor: default;
 }
 
-.headlink{
+.headlink {
   padding: 0.5rem;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  user-select: none;
+
 }
 
+.headlinkContainer {
+  min-width: 196px;
+  max-height: 350px;
+  overflow: auto;
+  box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  position: absolute;
+  top: 5.5rem;
+  z-index: 100;
+  right: 1.5rem;
+  border: 1px solid #3333337d;
+    border-radius: 1rem;
+    background-color: #0e0e0e91;
+    backdrop-filter: blur(5px);
+}
+
+
+@media screen and (max-width: 1212px) {
+  .headlinkContainer{
+    top: 6rem;
+  }
+}
+@media screen and (max-width: 691px) {
+  .headlinkContainer{
+    top: 7rem;
+  }
+}
+
+.headlinkSite {
+  display: flex;
+  gap: 1rem;
+    flex: 1 1 0%;
+    flex-direction: row;
+    -webkit-box-align: center;
+    align-items: center;
+    padding: 0.5rem;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    color: rgb(195, 197, 203);
+}
+
+#gen-button {
+  cursor: pointer;
+}
 a {
   color: lightgray;
   text-decoration: none;
@@ -89,7 +149,7 @@ h1,
 }
 
 input {
-  border: 1px solid #333333;
+  border: 1px double #3333337d;
   border-radius: 1rem;
   font-size: 16px;
   background-color: #0e0e0e91;
@@ -276,7 +336,7 @@ background-color: rgb(19, 19, 19);
 }
 
 #chain {
-    border: 1px solid #333333;
+    border: 1px solid #3333337d;
     border-radius: 1rem;
     font-size: 16px;
     background-color: #0e0e0e91;
