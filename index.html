@@ -2,7 +2,7 @@
 <head>
     <title>Kadena Balance Checker</title>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pact-lang-api@4.1.2/pact-lang-api-global.min.js"></script>
@@ -58,7 +58,7 @@
       }
       catch(e){
         console.log(e)
-        attachCell("h4", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
+        attachCell("h3", "Unable to fetch from " + JSON.stringify(server), "total", `total-value`)
       }
     }
 
@@ -76,9 +76,13 @@
           : 0
         chainBal[chainId] = Number(bal);
         let totalBal = Object.values(chainBal).reduce((accum, cum) => accum+cum, 0);
+        let totalBalLogal = totalBal.toLocaleString("en-US");
         const balanceElem = document.getElementById(`chain-${chainId}-balance-data`);
         const guardElem = document.getElementById(`chain-${chainId}-guard-data`);
-        attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
+        // attachCell("h3", `Total Balance of ${acctName}: ${totalBalLogal} KDA`, "total", `total-value`);
+        attachCell("span", `${acctName}`, "accname", `accname`);
+        attachCell("span", `${totalBalLogal} KDA`, "total", `total-value`);
+
         if (result.status==="success"){
           balanceElem.textContent = bal;
           balanceElem.className = "";
@@ -139,26 +143,12 @@
       if (localStorage.getItem("kadena-account")){
         document.getElementById("account").value = localStorage.getItem("kadena-account");
       }
-
-      let search = window.location.href;
-      let params = new URLSearchParams(search);
-      if (params.get("account")) document.getElementById("account").value = params.get("account");
-      if (params.get("token")) document.getElementById("token").value = params.get("token");
-      if (params.get("version")) {
-        if (params.get("version") === "mainnet01") document.getElementById("server").value = "api.chainweb.com";
-        else if (params.get("version") === "testnet04")  document.getElementById("server").value = "api.testnet.chainweb.com";
-      }
-      if (params.get("account") && params.get("version")) onClick();
     }, false);
-    
+
     document.addEventListener('click', async function (event) {
       chainBal = {}
       if (!event.target.matches('#balance')) return;
       event.preventDefault();
-      onClick();
-    }, false);
-
-    async function onClick() {
       const server = document.getElementById('server').value;
       const token = document.getElementById('token').value;
       const info = await getVersion(server);
@@ -184,96 +174,147 @@
           getBalance(host,token,acctName,id)
         });
       }
-    }
-
-    document.addEventListener('click', async function (event) {
-      chainBal = {}
-      if (!event.target.matches('#balance')) return;
-      event.preventDefault();
-      onClick();
     }, false);
 
+    function download(data, filename, type) {
+        var file = new Blob([data], {type: type});
+        if (window.navigator.msSaveOrOpenBlob) // IE10+
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        else { // Others
+            var a = document.createElement("a"),
+                    url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function() {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+      }
+
+      document.addEventListener('click', async function (event) {
+          if (!event.target.matches('#gen-button')) return;
+          event.preventDefault();
+          var kp = Pact.crypto.genKeyPair();
+          var id = kp.publicKey.substring(0, 6);
+          var priv = `public: ${kp.publicKey}\nsecret: ${kp.secretKey}`
+          var privName = `private-keypair-${id}.kda`
+          var pub = `public: ${kp.publicKey}`
+          var pubName = `public-keypair-${id}.kda`
+          download(priv, privName, "text/plain;charset=utf-8");
+          download(pub, pubName, "text/plain;charset=utf-8");
+      }, false);
+
+      function simpleToggle() {
+        var menuD = document.getElementById("menuDiv");
+        if (menuD.style.display === "none") {
+          menuD.style.display = "block";
+        } else {
+          menuD.style.display = "none";
+        }
+      }
   </script>
 </head>
 <body>
     <div id="main">
-      <div class="container">
-          <h1>Kadena Balance Checker</h1>
-          <div id="subhead">
-            <span class="headlink">Balance Checker</span>
+
+      <img class="graph" src="./img/graph.png" alt="graph">
+      <div class="nav">
+        <h1>Kadena Balance Checker</h1>
+        <div class="container">
+          <!-- <div id="subhead">
+            <span class="headlink current">Balance Checker</span>
             <a class="headlink" href="modules.html">Code Viewer</a>
+          </div> -->
+        </div>
+        <div class="container-right">
+          <div id="subhead" class="subheadButton">
+            <span class="headlink" onclick="simpleToggle()">
+              <div>Menu</div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </span>
           </div>
+          <span id="menuDiv" class="headlinkContainer" style="display: none;">
+            <a class="headlinkSite" href="https://transfer.chainweb.com/transfer-create.html">
+              <div>Coin Transfer</div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+            </a>
+            <a class="headlinkSite" href="https://transfer.chainweb.com/xchain.html">
+              <div>Cross Chain Transfer</div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"><path d="M16 3h5v5M4 20L20.2 3.8M21 16v5h-5M15 15l5.1 5.1M4 4l5 5"/></svg>
+            </a>
+            <a class="headlinkSite" href="https://balance.chainweb.com" style="opacity: 0.3;">
+              <div>Balance Checker</div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>           
+             </a>
+            <a class="headlinkSite" href="https://balance.chainweb.com/modules.html">
+              <div>Code Viewer</div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </a>
+            <a class="headlinkSite" id="gen-button" >
+              <div id="gen-button">Generate KeyPair</div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"/></svg>         
+            </a>
+          </span>
+        </div>
+      </div>
+      
+      <div class="container">
+
           <form id ="kadena-form" class="ui form">
             <div id="node-field" class="field">
                 <label>Target Chainweb Server</label>
-                <input type="text" id="server" placeholder="Enter Your Node Server">
+                <input type="text" id="server" placeholder="Enter Node Server" 
+                onkeydown = "if (event.keyCode == 13) document.getElementById('balance').click()">
             </div>
+
             <div id="token-field" class="field">
               <label>Token Name</label>
-              <input type="text" id="token" placeholder="Enter the name of the token contract" value="coin" >
+              <input type="text" id="token" placeholder="Enter the name of the token contract" value="coin" 
+              onkeydown = "if (event.keyCode == 13) document.getElementById('balance').click()">
             </div>
+
             <div id="account-field" class="field">
               <label>Your Account Name</label>
-              <input type="text" id="account" placeholder="Enter Your Account Name">
+              <input type="text" id="account" placeholder="Enter Account Name or Public Key" 
+              onkeydown = "if (event.keyCode == 13) document.getElementById('balance').click()">
               <div id="acct-err" class="ui center error message">
-                <div class="header">Account name is at least 3 characters</div>
               </div>
             </div>
-          <button id="balance" class="ui primary button">Check Balance</button>
+            <div class="info-text">Account name is at least 3 characters</div>
           </form>
-          <div class="result">
-            <table class = "ui very basic center collapsing table" id="data-table">
-              <thead id="chain-table"/>
-              <tbody id="balance-data"/>
-            </table>
-            <div id="total"/>
+
+          <div class="container">
+            <button id="balance" class="ui primary button">Check Balance</button>
+          </div>
+
+      </div>
+
+        <div class="result-container">
+          <div class="total-container">
+            <div class="info-container">
+              <div class="break">
+                <span class="info-text">Account Name</span>
+                <span id="accname"></span>
+              </div>
+              <div class="break">
+                <span class="info-text">Total Balance</span>
+                <span id="total"></span>
+              </div>
+
+            </div>
+        
+            <div class="result">
+              <table class = "ui very basic center collapsing table" id="data-table">
+                <thead id="chain-table"/>
+                <tbody id="balance-data"/>
+              </table>
+            </div>
+
           </div>
     </div>
 </body>
-<style>
 
-.container {
-  text-align: center;
-  margin-top: 20px;
-}
-.result {
- margin-top: 20px;
-}
-.check-button {
-  margin-top: 15px;
-}
-.field input {
-  margin-top: 5px;
-  width: 300px!important;
-}
-.ui #acct-err {
-  margin-top: 5px;
-  width: 300px;
-  margin: auto;
-  font-size: 13px;
-}
-table#data-table {
-  margin-left:auto;
-  margin-right:auto;
-}
-
-table#data-table th{
-  text-align: center;
-  width: 100px;
-}
-table#data-table td{
-  text-align: center;
-  width: 130px;
-}
-#subhead {
-margin-top: -10px;
-margin-bottom: 10px;
-}
-.headlink {
-  padding: 1em;
-}
-span.headlink {
-  color: lightgrey;
-}
-</style>
 </html>
