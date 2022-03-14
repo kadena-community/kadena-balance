@@ -75,10 +75,12 @@
             : (result.data.balance.decimal ? result.data.balance.decimal : 0)
           : 0
         chainBal[chainId] = Number(bal);
+        if(token=='coin')
+           token='KDA'
         let totalBal = Object.values(chainBal).reduce((accum, cum) => accum+cum, 0);
         const balanceElem = document.getElementById(`chain-${chainId}-balance-data`);
         const guardElem = document.getElementById(`chain-${chainId}-guard-data`);
-        attachCell("h4", `Total Balance of ${acctName}: ${totalBal} KDA`, "total", `total-value`)
+        attachCell("h4", `Total Balance of ${acctName}: ${totalBal} ${token}`, "total", `total-value`)
         if (result.status==="success"){
           balanceElem.textContent = bal;
           balanceElem.className = "";
